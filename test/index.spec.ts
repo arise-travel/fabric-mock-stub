@@ -19,7 +19,7 @@ describe('Test Mockstub', () => {
 
         const response: ChaincodeResponse = await stub.mockInit('uudif', args);
 
-        expect(Transform.bufferToObject(response.payload)['args']).to.deep.equal(args);
+        expect(Transform.uInt8ArrayToObject(response.payload)['args']).to.deep.equal(args);
     });
 
     const stubWithInit = new ChaincodeMockStub('mock', chaincode);
@@ -48,7 +48,7 @@ describe('Test Mockstub', () => {
 
         expect(response.status).to.eq(200);
 
-        expect(Transform.bufferToObject(response.payload)).to.deep.equal(car0);
+        expect(Transform.uInt8ArrayToObject(response.payload)).to.deep.equal(car0);
     });
 
     it('Should be able to query using getStateByRange', async () => {
@@ -57,7 +57,7 @@ describe('Test Mockstub', () => {
 
         expect(response.status).to.eq(200);
 
-        expect(Transform.bufferToObject(response.payload)).to.be.length(10);
+        expect(Transform.uInt8ArrayToObject(response.payload)).to.be.length(10);
     });
 
     it('Should be able to query using getStateByRange using keys', async () => {
@@ -400,7 +400,7 @@ describe('Test Mockstub', () => {
 
         const res = await stubWithInit.getStateByRangeWithPagination('', '', 2);
 
-        expect(res.metadata.fetched_records_count).to.eq(10);
+        expect(res.metadata.fetchedRecordsCount).to.eq(10);
         expect(res.metadata.bookmark).to.eq("1");
         expect((res.iterator as any).response.results.map(v => v.key)).to.deep.eq(["CAR0", "CAR1"]);
 

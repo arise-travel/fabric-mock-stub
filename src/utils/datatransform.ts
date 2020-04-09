@@ -59,6 +59,29 @@ export class Transform {
         }
     }
 
+    public static uInt8ArrayToObject(payload: Uint8Array): object | string {
+        if (payload === null) {
+            return null;
+        }
+
+        if (Number(parseFloat(payload.toString())) === (payload as any)) {
+            return payload;
+        }
+
+        const payloadString = payload.toString();
+
+        if (payloadString.length <= 0) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(payloadString);
+        } catch (err) {
+            this.logger.error('Error parsing Uint8Array to JSON', payloadString);
+            return payloadString;
+        }
+    }
+
     /**
      * bufferToDate
      *
@@ -101,10 +124,10 @@ export class Transform {
      * @param {'fabric-shim'.Iterators.Iterator} iterator
      * @returns {Promise<Array>}
      */
-    public static async iteratorToList(iterator: Iterators.CommonIterator) {
+    public static async iteratorToList(iterator: Iterators.CommonIterator<any>) {
         const allResults = [];
 
-        let res: Iterators.NextResult;
+        let res: Iterators.NextResult<any>;
         while (res == null || !res.done) {
             res = await iterator.next();
 
@@ -131,10 +154,10 @@ export class Transform {
      * @param {'fabric-shim'.Iterators.Iterator} iterator
      * @returns {Promise<Array>}
      */
-    public static async iteratorToKVList(iterator: Iterators.CommonIterator): Promise<KV[]> {
+    public static async iteratorToKVList(iterator: Iterators.CommonIterator<any>): Promise<KV[]> {
         const allResults = [];
 
-        let res: Iterators.NextResult;
+        let res: Iterators.NextResult<any>;
         while (res == null || !res.done) {
             res = await iterator.next();
             if (res.value && res.value.value.toString()) {
@@ -177,14 +200,14 @@ export class Transform {
                 };
 
                 try {
-                    parsedItem.value = JSON.parse(res.value.value.toString('utf8'));
+                    parsedItem.value = JSON.parse(res.value.value.toString());
                 } catch (err) {
-                    parsedItem.value = res.value.value.toString('utf8');
+                    parsedItem.value = res.value.value.toString();
                 }
 
-                parsedItem.is_delete = res.value.is_delete;
-                parsedItem.tx_id = res.value.tx_id;
-                parsedItem.timestamp = res.value.timestamp.getSeconds();
+                parsedItem.is_delete = res.value.isDelete;
+                parsedItem.tx_id = res.value.txId;
+                parsedItem.timestamp = res.value.timestamp.seconds;
 
                 allResults.push(parsedItem);
             }
