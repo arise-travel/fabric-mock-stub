@@ -1,7 +1,7 @@
 import * as queryEngine from '@theledger/couchdb-query-engine';
 import {
     ChaincodeInterface, ChaincodeProposal, ChaincodeResponse, ChaincodeStub, Iterators, SplitCompositekey,
-    StateQueryResponse
+    StateQueryResponse, Timestamp
 } from 'fabric-shim';
 import { LoggerInstance } from 'winston';
 import { KV, MockStub } from '.';
@@ -136,7 +136,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
     mockTransactionStart(txid: string, transientMap?: StateMap): void {
         this.txID = txid;
         this.setChaincodeProposal(<ChaincodeProposal.SignedProposal>{});
-        this.setTxTimestamp(new MockTimeStamp());
+        this.setTxTimestamp(new MockTimeStamp(0));
         this.transientMap = transientMap;
     }
 
@@ -405,8 +405,8 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
         this.signedProposal = sp;
     }
 
-    setTxTimestamp(t: MockTimeStamp): void {
-        this.txTimestamp = t;
+    setTxTimestamp(timestamp: MockTimeStamp): void {
+        this.txTimestamp = timestamp;
     }
 
     getTxTimestamp(): MockTimeStamp {
