@@ -45,7 +45,7 @@
   "dependencies": {
     "@theledger/couchdb-query-engine": "^2.4.4",
     "@types/google-protobuf": "^3.7.2",
-    "fabric-shim": "^1.4.x",
+    "fabric-shim": "2.0.0",
     "google-protobuf": "^3.6.1",
     "lodash": "^4.17.11",
     "ts-node": "^8.6.2",

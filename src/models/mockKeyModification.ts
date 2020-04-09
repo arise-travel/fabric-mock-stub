@@ -1,26 +1,30 @@
-import { Iterators } from 'fabric-shim';
-import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
-import { MockProtoTimestamp } from '../MockProtoTimestamp';
+import {Iterators} from 'fabric-shim';
+import {Timestamp} from 'google-protobuf/google/protobuf/timestamp_pb';
+import {MockProtoTimestamp} from '../MockProtoTimestamp';
+import {MockTimeStamp} from '../utils/MockTimeStamp';
 
 export class MockKeyModification implements Iterators.KeyModification {
 
-    public timestamp: Timestamp;
+    public timestamp: MockTimeStamp;
 
     // tslint:disable-next-line:variable-name
-    constructor(public is_delete: boolean, public value: Buffer, public tx_id: string) {
+    constructor(public isDelete: boolean, public value: Buffer, public txId: string) {
         this.timestamp = new MockProtoTimestamp();
     }
 
     getIsDelete(): boolean {
-        return this.is_delete;
+        return this.isDelete;
     }
+
     getValue(): Buffer {
         return this.value;
     }
+
     getTimestamp(): Timestamp {
         return this.timestamp;
     }
+
     getTxId(): string {
-        return this.tx_id;
+        return this.txId;
     }
 }

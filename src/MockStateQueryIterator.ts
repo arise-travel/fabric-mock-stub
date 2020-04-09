@@ -1,4 +1,5 @@
 import { Iterators } from 'fabric-shim';
+import { MockKeyValue } from './models/mockKeyValue';
 
 /**
  * @hidden
@@ -8,7 +9,7 @@ export class MockStateQueryIterator implements Iterators.StateQueryIterator {
     private currentLoc = 0;
     private closed = false;
 
-    constructor(private data: Iterators.KV[], public txID: string) {
+    constructor(private data: MockKeyValue[], public txID: string) {
     }
 
     get response() {
@@ -20,7 +21,7 @@ export class MockStateQueryIterator implements Iterators.StateQueryIterator {
         };
     }
 
-    next(): Promise<Iterators.NextResult> {
+    next(): Promise<Iterators.NextResult<MockKeyValue>> {
 
         if (this.closed) {
             throw new Error('Iterator has already been closed');

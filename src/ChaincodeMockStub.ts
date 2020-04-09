@@ -3,7 +3,6 @@ import {
     ChaincodeInterface, ChaincodeProposal, ChaincodeResponse, ChaincodeStub, Iterators, SplitCompositekey,
     StateQueryResponse
 } from 'fabric-shim';
-import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
 import { LoggerInstance } from 'winston';
 import { KV, MockStub } from '.';
 import { ChaincodeError } from './ChaincodeError';
@@ -15,6 +14,7 @@ import { MockKeyModification } from './models/mockKeyModification';
 import { MockKeyValue } from './models/mockKeyValue';
 import { Transform } from './utils/datatransform';
 import { Helpers } from './utils/helpers';
+import { MockTimeStamp } from './utils/MockTimeStamp';
 
 const defaultUserCert = '-----BEGIN CERTIFICATE-----' +
     'MIIB6TCCAY+gAwIBAgIUHkmY6fRP0ANTvzaBwKCkMZZPUnUwCgYIKoZIzj0EAwIw' +
@@ -40,7 +40,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
 
     private logger: LoggerInstance;
 
-    private txTimestamp: Timestamp;
+    private txTimestamp: MockTimeStamp;
     private txID = '';
     private args: string[];
     public state: StateMap = new Map();
@@ -136,7 +136,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
     mockTransactionStart(txid: string, transientMap?: StateMap): void {
         this.txID = txid;
         this.setChaincodeProposal(<ChaincodeProposal.SignedProposal>{});
-        this.setTxTimestamp(new Timestamp());
+        this.setTxTimestamp(new MockTimeStamp());
         this.transientMap = transientMap;
     }
 
@@ -294,33 +294,27 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @param {string} endKey
      * @returns {Promise<"fabric-shim".Iterators.StateQueryIterator>}
      */
-    getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
+    getStateByRange(startKey: string, endKey: string): any {
 
-        const items: Iterators.KV[] = Object.keys(this.state)
+        const items: MockKeyValue[] = Object.keys(this.state)
             .filter((k: string) => {
                 const comp1 = Helpers.strcmp(k, startKey);
                 const comp2 = Helpers.strcmp(k, endKey);
 
                 return (comp1 >= 0 && comp2 <= 0) || (startKey == '' && endKey == '');
             })
-            .map((k: string) => new MockKeyValue(k, this.state[k]));
+            .map((k: string) => new MockKeyValue(k, this.state[k], ''));
 
         return Promise.resolve(new MockStateQueryIterator(items, this.txID));
-
     }
 
     // tslint:disable-next-line:max-line-length
-    async getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
-
-        try {
-            const iterator = await this.getStateByRange(startKey, endKey);
-
-            return Promise.resolve(this.paginate(iterator, pageSize, bookmark));
-
-        } catch (err) {
-            throw err;
-        }
-
+    getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> & AsyncIterable<MockKeyValue> {
+        return this.getStateByRange(startKey, endKey).then((iterator) => {
+            return this.paginate(iterator, pageSize, bookmark);
+        }).catch((error) => {
+            throw error;
+        });
     }
 
     /**
@@ -337,7 +331,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @param {string} query
      * @returns {Promise<"fabric-shim".Iterators.StateQueryIterator>}
      */
-    getQueryResult(query: string): Promise<Iterators.StateQueryIterator> {
+    getQueryResult(query: string): any {
 
         const keyValues: any = {};
 
@@ -359,20 +353,18 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
         }
 
         const items = queryEngine.parseQuery(keyValues, parsedQuery)
-            .map((item: KV) => new MockKeyValue(item.key, Transform.serialize(item.value)));
+            .map((item: KV) => new MockKeyValue(item.key, Transform.serialize(item.value), ''));
 
         return Promise.resolve(new MockStateQueryIterator(items, this.txID));
     }
 
     // tslint:disable-next-line:max-line-length
-    async getQueryResultWithPagination(query: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
-        try {
-            const iterator = await this.getQueryResult(query);
-
+    getQueryResultWithPagination(query: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> & AsyncIterable<MockKeyValue> {
+        return this.getQueryResult(query).then((iterator) => {
             return this.paginate(iterator, pageSize, bookmark);
-        } catch (err) {
-            throw err;
-        }
+        }).catch((error) => {
+            throw error;
+        });
     }
 
     /**
@@ -382,21 +374,19 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @param {string[]} attributes
      * @returns {Promise<"fabric-shim".Iterators.StateQueryIterator>}
      */
-    getStateByPartialCompositeKey(objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> {
+    getStateByPartialCompositeKey(objectType: string, attributes: string[]): any {
         const partialCompositeKey = CompositeKeys.createCompositeKey(objectType, attributes);
 
         return this.getStateByRange(partialCompositeKey, partialCompositeKey + CompositeKeys.MAX_UNICODE_RUNE_VALUE);
     }
 
     // tslint:disable-next-line:max-line-length
-    async getStateByPartialCompositeKeyWithPagination(objectType: string, attributes: string[], pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> {
-        try {
-            const iterator = await this.getStateByPartialCompositeKey(objectType, attributes);
-
+    getStateByPartialCompositeKeyWithPagination(objectType: string, attributes: string[], pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> & AsyncIterable<MockKeyValue> {
+        return this.getStateByPartialCompositeKey(objectType, attributes).then((iterator) => {
             return this.paginate(iterator, pageSize, bookmark);
-        } catch (err) {
-            throw err;
-        }
+        }).catch((error) => {
+            throw error;
+        });
     }
 
     createCompositeKey(objectType: string, attributes: string[]): string {
@@ -415,11 +405,11 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
         this.signedProposal = sp;
     }
 
-    setTxTimestamp(t: Timestamp): void {
+    setTxTimestamp(t: MockTimeStamp): void {
         this.txTimestamp = t;
     }
 
-    getTxTimestamp(): Timestamp {
+    getTxTimestamp(): MockTimeStamp {
         if (this.txTimestamp == null) {
             throw new Error('TxTimestamp not set.');
         }
@@ -446,7 +436,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @param {string} key
      * @returns {Promise<"fabric-shim".Iterators.HistoryQueryIterator>}
      */
-    getHistoryForKey(key: string): Promise<Iterators.HistoryQueryIterator> {
+    getHistoryForKey(key: string): any {
         return Promise.resolve(new MockHistoryQueryIterator(this.history[key], this.txID));
     }
 
@@ -560,18 +550,18 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @param {string} endKey
      * @returns {Promise<"fabric-shim".Iterators.StateQueryIterator>}
      */
-    getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> {
+    getPrivateDataByRange(collection: string, startKey: string, endKey: string): any {
 
         const privateCollection = this.privateCollections[collection] || {};
 
-        const items: Iterators.KV[] = Object.keys(privateCollection)
+        const items: MockKeyValue[] = Object.keys(privateCollection)
             .filter((k: string) => {
                 const comp1 = Helpers.strcmp(k, startKey);
                 const comp2 = Helpers.strcmp(k, endKey);
 
                 return (comp1 >= 0 && comp2 <= 0) || (startKey == '' && endKey == '');
             })
-            .map((k: string) => new MockKeyValue(k, privateCollection[k]));
+            .map((k: string) => new MockKeyValue(k, privateCollection[k], ''));
 
         return Promise.resolve(new MockStateQueryIterator(items, this.txID));
 
@@ -592,7 +582,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @param {string} query
      * @returns {Promise<"fabric-shim".Iterators.StateQueryIterator>}
      */
-    getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator> {
+    getPrivateDataQueryResult(collection: string, query: string): any {
 
         const privateCollection = this.privateCollections[collection] || {};
 
@@ -618,7 +608,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
         }
 
         const items = queryEngine.parseQuery(keyValues, parsedQuery)
-            .map((item) => new MockKeyValue(item.key, Transform.serialize(item.value)));
+            .map((item) => new MockKeyValue(item.key, Transform.serialize(item.value), ''));
 
         return Promise.resolve(new MockStateQueryIterator(items, this.txID));
     }
@@ -659,13 +649,17 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
         return Promise.resolve(policy);
     }
 
-    getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> {
+    getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): any {
         const partialCompositeKey = CompositeKeys.createCompositeKey(objectType, attributes);
 
         return this.getPrivateDataByRange(collection, partialCompositeKey, partialCompositeKey + CompositeKeys.MAX_UNICODE_RUNE_VALUE);
     }
 
-    private paginate(iterator: Iterators.CommonIterator, pageSize: number, bookmark?: string): StateQueryResponse<Iterators.CommonIterator> {
+    private paginate(
+        iterator: Iterators.CommonIterator<MockKeyValue>,
+        pageSize: number,
+        bookmark?: string
+    ): StateQueryResponse<Iterators.CommonIterator<MockKeyValue>> {
 
         const items = (iterator as any).response.results;
 
@@ -676,11 +670,9 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
         return {
             iterator: new MockStateQueryIterator(pagedItems, this.txID),
             metadata: {
-                fetched_records_count: items.length,
+                fetchedRecordsCount: items.length,
                 bookmark: `${(start / pageSize) + 1}`
-
             }
         };
     }
-
 }
