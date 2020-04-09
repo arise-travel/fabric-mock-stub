@@ -2,8 +2,7 @@ import { ChaincodeError } from './ChaincodeError';
 import { Transform } from './utils/datatransform';
 import { ChaincodeMockStub } from './ChaincodeMockStub';
 import { Helpers } from './utils/helpers';
-import { ChaincodeStub, ChaincodeResponse, ChaincodeProposal } from 'fabric-shim';
-import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
+import { ChaincodeResponse, ChaincodeProposal, Timestamp } from 'fabric-shim';
 
 export {
     ChaincodeError,

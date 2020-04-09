@@ -20,7 +20,7 @@ export class MockKeyModification implements Iterators.KeyModification {
         return this.value;
     }
 
-    getTimestamp(): Timestamp {
+    getTimestamp(): MockTimeStamp {
         return this.timestamp;
     }
 
