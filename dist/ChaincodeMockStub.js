@@ -128,7 +128,7 @@ class ChaincodeMockStub {
     mockTransactionStart(txid, transientMap) {
         this.txID = txid;
         this.setChaincodeProposal({});
-        this.setTxTimestamp(new MockTimeStamp_1.MockTimeStamp(0));
+        this.setTxTimestamp(new MockTimeStamp_1.MockTimeStamp(Date.now()));
         this.transientMap = transientMap;
     }
     /**
@@ -448,7 +448,10 @@ class ChaincodeMockStub {
      * @returns {Promise<Buffer>}
      */
     getPrivateData(collection, key) {
-        return (this.privateCollections[collection] || {})[key];
+        if (this.privateCollections[collection]) {
+            return (this.privateCollections[collection][key] || Buffer.from(""));
+        }
+        return Promise.resolve(Buffer.from(""));
     }
     /**
      * Store a value for this key in the local state

@@ -152,7 +152,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
     mockTransactionStart(txid: string, transientMap?: StateMap): void {
         this.txID = txid;
         this.setChaincodeProposal(<ChaincodeProposal.SignedProposal>{});
-        this.setTxTimestamp(new MockTimeStamp(0));
+        this.setTxTimestamp(new MockTimeStamp(Date.now()));
         this.transientMap = transientMap;
     }
 
@@ -516,7 +516,11 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @returns {Promise<Buffer>}
      */
     getPrivateData(collection: string, key: string): Promise<Buffer> {
-        return (this.privateCollections[collection][key] || Buffer.from(""));
+        if(this.privateCollections[collection]){
+            return (this.privateCollections[collection][key] || Buffer.from(""));
+        }
+
+        return Promise.resolve(Buffer.from(""));
     }
 
     /**
