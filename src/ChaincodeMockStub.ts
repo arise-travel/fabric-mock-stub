@@ -516,7 +516,7 @@ export class ChaincodeMockStub implements MockStub, ChaincodeStub {
      * @returns {Promise<Buffer>}
      */
     getPrivateData(collection: string, key: string): Promise<Buffer> {
-        return (this.privateCollections[collection] || {})[key];
+        return (this.privateCollections[collection][key] || Buffer.from(""));
     }
 
     /**
