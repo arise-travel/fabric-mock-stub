@@ -1,0 +1,20 @@
+language: node_js
+
+node_js:
+  - "8.16.2"
+
+install:
+  - yarn install
+
+script:
+  - yarn run test:coverage
+
+after_success: npm run report-coverage
+
+deploy:
+  provider: npm
+  email: jonas.snellinckx@theledger.be
+  skip_cleanup: true
+  api_key: $NPM_TOKEN
+  on:
+    tags: true
