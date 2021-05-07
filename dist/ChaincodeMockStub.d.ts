@@ -8,7 +8,7 @@ import { MockTimeStamp } from './utils/MockTimeStamp';
  * Mock implementation of the fabric-shim stub
  */
 export declare type StateMap = Map<string, Buffer>;
-export declare class ChaincodeMockStub extends ChaincodeStub implements MockStub {
+export declare class ChaincodeMockStub implements MockStub, ChaincodeStub {
     private name;
     private cc;
     private usercert;
@@ -37,6 +37,14 @@ export declare class ChaincodeMockStub extends ChaincodeStub implements MockStub
      * @returns {string}
      */
     getTxID(): string;
+    /**
+     * @returns {string}
+     */
+    getMspID(): string;
+    /**
+     * @returns {string}
+     */
+    getMSPID(): string;
     /**
      * Get the current arguments
      *

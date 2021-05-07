@@ -187,7 +187,7 @@ class Transform {
                     }
                     parsedItem.is_delete = res.value.isDelete;
                     parsedItem.tx_id = res.value.txId;
-                    parsedItem.timestamp = res.value.timestamp.seconds;
+                    parsedItem.timestamp = res.value.timestamp.seconds.toNumber();
                     allResults.push(parsedItem);
                 }
             }

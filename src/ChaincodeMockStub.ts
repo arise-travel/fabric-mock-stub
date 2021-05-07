@@ -36,7 +36,7 @@ const defaultUserCert = '-----BEGIN CERTIFICATE-----' +
 
 export type StateMap = Map<string, Buffer>;
 
-export class ChaincodeMockStub  extends ChaincodeStub implements MockStub {
+export class ChaincodeMockStub implements MockStub, ChaincodeStub {
 
     private logger: LoggerInstance;
 
@@ -60,7 +60,6 @@ export class ChaincodeMockStub  extends ChaincodeStub implements MockStub {
      * @param {string} [usercert] - User creds certificate with/without attributes
      */
     constructor(private name: string, private cc: ChaincodeInterface, private usercert: string = defaultUserCert) {
-        super()
         this.logger = Helpers.getLoggerInstance(this.name);
     }
 
@@ -74,6 +73,22 @@ export class ChaincodeMockStub  extends ChaincodeStub implements MockStub {
     getTxID(): string {
         return this.txID;
     }
+
+    
+    /**
+     * @returns {string}
+     */
+     getMspID(): string {
+        return this.mspId;
+    }
+
+
+    /**
+     * @returns {string}
+     */
+         getMSPID(): string {
+            return this.mspId;
+        }
 
     /**
      * Get the current arguments

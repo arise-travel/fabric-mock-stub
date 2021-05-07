@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const queryEngine = require("@theledger/couchdb-query-engine");
-const fabric_shim_1 = require("fabric-shim");
 const ChaincodeError_1 = require("./ChaincodeError");
 const ChaincodeProposalCreator_1 = require("./ChaincodeProposalCreator");
 const CompositeKeys_1 = require("./CompositeKeys");
@@ -34,14 +33,13 @@ const defaultUserCert = '-----BEGIN CERTIFICATE-----' +
     'svTTvBqLR5JeQSctJuz3zaqGRqSs2iW+QB3FAiAIP0mGWKcgSGRMMBvaqaLytBYo' +
     '9v3hRt1r8j8vN0pMcg==' +
     '-----END CERTIFICATE-----';
-class ChaincodeMockStub extends fabric_shim_1.ChaincodeStub {
+class ChaincodeMockStub {
     /**
      * @param {string} name - Name of the mockstub
      * @param {ChaincodeInterface} cc - Your chaincode
      * @param {string} [usercert] - User creds certificate with/without attributes
      */
     constructor(name, cc, usercert = defaultUserCert) {
-        super();
         this.name = name;
         this.cc = cc;
         this.usercert = usercert;
@@ -65,6 +63,18 @@ class ChaincodeMockStub extends fabric_shim_1.ChaincodeStub {
      */
     getTxID() {
         return this.txID;
+    }
+    /**
+     * @returns {string}
+     */
+    getMspID() {
+        return this.mspId;
+    }
+    /**
+     * @returns {string}
+     */
+    getMSPID() {
+        return this.mspId;
     }
     /**
      * Get the current arguments
