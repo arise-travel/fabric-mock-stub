@@ -1,0 +1,1 @@
+{"version":3,"file":"MockTimeStamp.js","sourceRoot":"","sources":["../../src/utils/MockTimeStamp.ts"],"names":[],"mappings":";;AAEA,MAAa,aAAa;IAItB,YAAmB,SAAiB;QAChC,IAAI,CAAC,OAAO,GAAG,IAAI,CAAC,KAAK,CAAC,SAAS,GAAG,IAAI,CAAC,CAAC;QAC5C,IAAI,CAAC,KAAK,GAAG,CAAC,SAAS,GAAG,IAAI,CAAC,OAAO,GAAG,IAAI,CAAC,GAAG,OAAO,CAAC;IAC7D,CAAC;CACJ;AARD,sCAQC"}
